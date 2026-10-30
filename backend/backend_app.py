@@ -19,13 +19,11 @@ def get_posts():
 def create_post():
     data = request.get_json()
 
-    # Fehlerbehandlung
     if not data or "title" not in data:
         return jsonify({"error": "Missing field: title"}), 400
     if "content" not in data:
         return jsonify({"error": "Missing field: content"}), 400
 
-    # Neue ID generieren
     new_id = max([p["id"] for p in POSTS], default=0) + 1
 
     new_post = {
@@ -49,6 +47,24 @@ def delete_post(post_id):
 
     POSTS = new_posts
     return jsonify({"message": "Post deleted"})
+
+
+@app.route('/api/posts/<int:post_id>', methods=['PUT'])
+def update_post(post_id):
+    data = request.get_json()
+
+    for post in POSTS:
+        if post["id"] == post_id:
+
+            if "title" in data:
+                post["title"] = data["title"]
+
+            if "content" in data:
+                post["content"] = data["content"]
+
+            return jsonify(post), 200
+
+    return jsonify({"error": "Post not found"}), 404
 
 
 if __name__ == '__main__':
