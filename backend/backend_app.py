@@ -78,11 +78,30 @@ def search_posts():
         title_match = title_query in post["title"].lower() if title_query else False
         content_match = content_query in post["content"].lower() if content_query else False
 
-        # Wenn einer der Parameter passt → hinzufügen
         if title_match or content_match:
             results.append(post)
 
     return jsonify(results), 200
+
+
+@app.route('/api/posts', methods=['GET'])
+def get_posts():
+    sort_field = request.args.get('sort')
+    direction = request.args.get('direction', 'asc')
+
+    if not sort_field:
+        return jsonify(POSTS)
+
+    if sort_field not in ["title", "content"]:
+        return jsonify({"error": "Invalid sort field. Use 'title' or 'content'."}), 400
+
+    if direction not in ["asc", "desc"]:
+        return jsonify({"error": "Invalid direction. Use 'asc' or 'desc'."}), 400
+
+    reverse = (direction == "desc")
+    sorted_posts = sorted(POSTS, key=lambda p: p[sort_field].lower(), reverse=reverse)
+
+    return jsonify(sorted_posts)
 
 
 if __name__ == '__main__':
